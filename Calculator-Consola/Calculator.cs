@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Linq;
 
-internal static class Calculator
+class Calculator
 {
     public static void swap(ref double a, ref double b)
     {
@@ -11,7 +11,7 @@ internal static class Calculator
         a = b;
         b = t;
     }
-    private static bool EsteOperatie<T>(T c)
+    static bool EsteOperatie<T>(T c)
     {
         switch (c)
         {
@@ -32,7 +32,7 @@ internal static class Calculator
                 return false;
         }
     }
-    private static int EvalueazaOperatie<T>(T c)
+    static int EvalueazaOperatie<T>(T c)
     {
         switch (c)
         {
@@ -55,8 +55,7 @@ internal static class Calculator
                 return 0;
         }
     }
-
-    private static double EvalueazaSemn(string c, double a, double b)
+    static double EvalueazaSemn(string c, double a, double b)
     {
         switch (c)
         {
@@ -75,8 +74,7 @@ internal static class Calculator
                 return 0.0;
         }
     }
-
-    private static double EvalueazaNumar(string S, int start, int end)
+    static double EvalueazaNumar(string S, int start, int end)
     {
         double num = 0.0;
         if(end == 0) // We have to account for when we are given a single digit
@@ -88,32 +86,27 @@ internal static class Calculator
         }
         return num;
     }
-
-    private static double Adunare(double a, double b)
+    static double Adunare(double a, double b)
     {
         float rez = (float)a + (float)b;
         return rez;
     }
-
-    private static double Scadere(double a, double b)
+    static double Scadere(double a, double b)
     {
         float rez = (float)a - (float)b;
         return rez;
     }
-
-    private static double Inmultire(double a, double b)
+    static double Inmultire(double a, double b)
     {
         float rez = (float)a * (float)b;
         return rez;
     }
-
-    private static double Putere(double a, double b)
+    static double Putere(double a, double b)
     {
         float rez = (float) Math.Pow(a, b);
         return rez;
     }
-
-    private static double Impartire(double a, double b)
+    static double Impartire(double a, double b)
     {
         // We can't store the number 0 in a double, and 0.0 does not throw an exception
         // The result of dividing by 0.0 is infinity
@@ -122,13 +115,13 @@ internal static class Calculator
         Console.WriteLine("Impartirea la 0 este imposibila.");
         return 0.0;
     }
-
-    private static ArrayList CreeazaPoloneza(string expresie)
+    //Creating the postfix form
+    static ArrayList CreeazaPoloneza(string expresie)
     {
         int start = 0;
         ArrayList semne = new ArrayList();
         ArrayList poloneza = new ArrayList();
-        while (char.IsDigit(expresie[0]) || EsteOperatie(expresie[0]))
+        while (expresie != "" && (char.IsDigit(expresie[0]) || EsteOperatie(expresie[0])))
         {
             int semnStart = 0;
             int semnPrio = 0;
@@ -136,7 +129,9 @@ internal static class Calculator
             int length = 0;
             semne.Clear();
             string expresietemp = "";
+            // Hacky way to check where the last digit is later
             expresie += " ";
+            // We will look for all of the operations first
             for (int i = 0; i < expresie.Length; i++)
             {
                 if (EvalueazaOperatie(expresie[i]) > semnPrio)
@@ -162,7 +157,9 @@ internal static class Calculator
                     }
                 }
             }
+            // For some reason they always were in the exact opposite order
             semne.Reverse();
+            // Checking to see where the first number after the operator ends
             if (semnPrio > 0)
             {
                 for (int i = semnStart + 1; i < expresie.Length; i++)
@@ -181,6 +178,7 @@ internal static class Calculator
                     }
                 }
             }
+            // Processing all of the numbers
             for (int i = length; i <= semnStart; i++)
             {
                 if (char.IsNumber(expresie[i]))
@@ -217,6 +215,7 @@ internal static class Calculator
                 opCut = i;
             }
             poloneza.AddRange(semne);
+            // Cutting out the part we have already included in the postfix form
             if (length > 0)
                 expresietemp = expresie.Substring(0, length);
             expresie = expresietemp + expresie.Substring(opCut + 1);
@@ -228,7 +227,7 @@ internal static class Calculator
     {
         ArrayList poloneza = new ArrayList();
         poloneza = CreeazaPoloneza(expresie);
-        // Showing the postfix form on screen
+        // Showing the postfix form on screen (for testing)
         /*
         foreach(string s in poloneza)
             Console.Write(s + " ");
@@ -247,6 +246,7 @@ internal static class Calculator
             {
                 if (double.TryParse((string)poloneza[i], out _))
                 {
+                    // Gotta do this otherwise the numbers might end up in the wrong order
                     if (b > 0.0 && a > 0.0)
                     {
                         swap(ref a, ref b);
@@ -271,8 +271,10 @@ internal static class Calculator
                     break;
                 }
             }
+            // Floats are weird
             rez = (int)(rez * 1000);
             rez /= 1000;
+            // Cutting out the part we have already handled
             ArrayList polTemp = new ArrayList();
             if (pos1 > 0)
             {
@@ -287,7 +289,6 @@ internal static class Calculator
             }
             poloneza = polTemp;
         }
-        //Console.WriteLine("\nRezultatul este: " + rez.ToString() + "\n");
         return rez;
     }
 }
